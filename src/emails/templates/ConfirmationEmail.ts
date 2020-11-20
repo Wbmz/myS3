@@ -1,5 +1,3 @@
-function ConfirmationEmail() {
-
-}
+function ConfirmationEmail() {}
 
 export default ConfirmationEmail;
