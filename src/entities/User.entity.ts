@@ -1,3 +1,4 @@
+import { Bucket } from './Bucket.entity';
 import {
     BaseEntity,
     Entity,
@@ -7,6 +8,8 @@ import {
     CreateDateColumn,
     UpdateDateColumn,
     BeforeInsert,
+    OneToMany,
+    BeforeUpdate,
 } from 'typeorm';
 import { Length, IsDate } from 'class-validator';
 import { hashSync, compareSync, genSaltSync } from 'bcryptjs';
@@ -27,6 +30,9 @@ export class User extends BaseEntity {
     @Length(4, 100)
     password!: string;
 
+    @OneToMany(() => Bucket, (bucket: Bucket) => bucket.user)
+    buckets!: Bucket[];
+
     @Column()
     @CreateDateColumn()
     @IsDate()
@@ -38,6 +44,7 @@ export class User extends BaseEntity {
     updatedAt!: Date;
 
     @BeforeInsert()
+    @BeforeUpdate()
     hashPassword(): void {
         this.password = hashSync(this.password, genSaltSync());
     }
