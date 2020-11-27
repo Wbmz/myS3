@@ -1,6 +1,6 @@
 import { Request, Response } from 'express';
 import jwt from 'jsonwebtoken';
-import { config, createSubFolder } from '../helpers';
+import { config, createFolder, getPath } from '../helpers';
 import { User } from './../entities/User.entity';
 import { sendConfirmationEmail, sendPasswordChanged, sendPasswordReset } from './../emails/index';
 
@@ -22,7 +22,7 @@ class AuthController {
             user.password = password;
             try {
                 user = await User.save(user);
-                createSubFolder(user.id);
+                createFolder(getPath(user.id));
                 await sendConfirmationEmail(email, { nickname });
                 const token = jwt.sign({ email, date: new Date() }, config.jwtSecret);
                 return res.status(200).send({
