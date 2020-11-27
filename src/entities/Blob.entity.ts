@@ -6,25 +6,29 @@ import {
     CreateDateColumn,
     UpdateDateColumn,
     ManyToOne,
-    OneToMany,
 } from 'typeorm';
-import { User } from './User.entity';
+import { Bucket } from './Bucket.entity';
 import { IsDate } from 'class-validator';
-import { Blob } from './Blob.entity';
 
 @Entity()
-export class Bucket extends BaseEntity {
+export class Blob extends BaseEntity {
     @PrimaryGeneratedColumn()
     id!: number;
 
     @Column()
     name!: string;
 
-    @OneToMany(() => Blob, blob => blob.bucket)
-    blobs!: Blob[];
+    @Column()
+    path!: string;
 
-    @ManyToOne(() => User, user => user.buckets)
-    user!: User;
+    @Column()
+    mimetype!: string;
+
+    @Column()
+    size!: number;
+
+    @ManyToOne(() => Bucket, bucket => bucket.blobs)
+    bucket!: Bucket;
 
     @Column()
     @CreateDateColumn()

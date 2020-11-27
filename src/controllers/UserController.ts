@@ -2,6 +2,11 @@ import { Request, Response } from 'express';
 import { User } from './../entities/User.entity';
 
 class UserController {
+    static async getAll(req: Request, res: Response): Promise<Response> {
+        const users = await User.find();
+        return res.status(200).send({ data: users });
+    }
+
     static async getOneById(req: Request, res: Response): Promise<Response> {
         const { id } = req.params;
         try {

@@ -18,7 +18,7 @@ import { hashSync, compareSync, genSaltSync } from 'bcryptjs';
 @Unique(['email'])
 export class User extends BaseEntity {
     @PrimaryGeneratedColumn('uuid')
-    id!: number;
+    id!: string;
 
     @Column()
     nickname!: string;
