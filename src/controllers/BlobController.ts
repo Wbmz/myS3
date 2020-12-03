@@ -12,6 +12,21 @@ class BlobController {
         return res.status(200).send({ data: blobs });
     }
 
+    static async download(req: Request, res: Response): Promise<void> {
+        const { id } = req.params;
+        try {
+            const blob: Blob = await Blob.findOneOrFail({
+                where: {
+                    id,
+                },
+            });
+
+            res.download(blob.path);
+        } catch (error) {
+            res.status(404).send('Blob not found');
+        }
+    }
+
     static async metadata(req: Request, res: Response): Promise<Response> {
         const { id } = req.params;
         try {
