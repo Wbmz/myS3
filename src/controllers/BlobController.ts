@@ -11,6 +11,39 @@ class BlobController {
         return res.status(200).send({ data: blobs });
     }
 
+    static async duplicate(req: Request, res: Response): Promise<Response> {
+        const { id } = req.params;
+        let blob: Blob;
+        try {
+            blob = await Blob.findOneOrFail({
+                where: { id },
+            });
+        } catch (error) {
+            return res.status(404).send('Blob not found');
+        }
+
+        if (fs.existsSync(blob.path)) {
+            const { dir, name, ext } = path.parse(blob.path);
+            const regex: RegExp = new RegExp(name + `.copy.([\\d]+)`);
+            const duplicateFiles: string[] = fs.readdirSync(dir).filter(file => file.match(regex));
+            const lastDuplicate: string | undefined = duplicateFiles.sort().pop();
+            let newFile = `${name}.copy.1${ext}`;
+
+            if (lastDuplicate) {
+                const fileCopy: RegExpMatchArray | null = lastDuplicate.match(regex);
+                if (fileCopy) {
+                    newFile = `${name}.copy.${Number(fileCopy[1]) + 1}${ext}`;
+                    fs.copyFileSync(blob.path, path.join(dir, newFile));
+                }
+            } else {
+                fs.copyFileSync(blob.path, path.join(dir, newFile));
+            }
+            return res.status(200).send(`${name} duplicated into ${newFile}`);
+        }
+
+        return res.status(404).send(`${blob.name} path not found`);
+    }
+
     static async save(req: Request, res: Response): Promise<Response> {
         const fields: string[] = ['bucketId', 'userId'];
         const missingValues = fields.filter(key => !(key in req.body));
