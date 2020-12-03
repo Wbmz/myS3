@@ -1,6 +1,6 @@
 import { Router } from 'express';
 import multer from 'multer';
-import BlobController from '../controllers/BlobController';
+import BlobController from '../../controllers/BlobController';
 
 const routes = Router();
 const upload = multer();

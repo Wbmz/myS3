@@ -103,7 +103,7 @@ class AuthController {
 
         const fields: string[] = ['oldPassword', 'newPassword'];
 
-        const missingValues = fields.filter(key => !(key in req.body));
+        const missingValues: string[] = fields.filter(key => !(key in req.body));
         if (missingValues.length === 0) {
             const { oldPassword, newPassword } = req.body;
             if (!(oldPassword && newPassword)) {
