@@ -24,7 +24,7 @@ class AuthController {
                 user = await User.save(user);
                 createFolder(getPath(user.id));
                 await sendConfirmationEmail(email, { nickname });
-                const token = jwt.sign({ email, date: new Date() }, config.jwtSecret);
+                const token = jwt.sign({ id: user.id, email: user.email }, config.jwtSecret);
                 return res.status(200).send({
                     token,
                     data: user,
