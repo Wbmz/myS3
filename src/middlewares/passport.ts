@@ -15,6 +15,8 @@ passport.use(
         },
         async (jwtPayload, next) => {
             try {
+                next(`next jwtPayload ${jwtPayload}`);
+                console.log(`console jwtPayload ${jwtPayload}`);
                 const { id } = jwtPayload;
                 const user: User | undefined = await User.findOne({ where: { id } });
 
