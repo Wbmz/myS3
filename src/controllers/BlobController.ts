@@ -1,5 +1,6 @@
 import { Request, Response } from 'express';
 import fs from 'fs';
+import path from 'path';
 import { Blob } from '../entities/Blob.entity';
 import { deleteFile, getPath } from '../helpers';
 import { Bucket } from './../entities/Bucket.entity';
@@ -9,6 +10,21 @@ class BlobController {
         const { id } = req.params;
         const blobs = await Blob.find({ where: { bucket: { id } } });
         return res.status(200).send({ data: blobs });
+    }
+
+    static async metadata(req: Request, res: Response): Promise<Response> {
+        const { id } = req.params;
+        try {
+            const blob: Blob = await Blob.findOneOrFail({
+                select: ['path', 'size', 'mimetype'],
+                where: {
+                    id,
+                },
+            });
+            return res.status(200).send({ data: blob });
+        } catch (error) {
+            return res.status(404).send('Blob not found');
+        }
     }
 
     static async duplicate(req: Request, res: Response): Promise<Response> {
