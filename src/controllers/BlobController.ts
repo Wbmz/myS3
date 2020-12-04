@@ -22,13 +22,14 @@ class BlobController {
                 where: { id },
                 relations: ['bucket', 'bucket.user'],
             });
+            const ext = path.extname(blob.name);
             const { bucket } = blob;
             const { user } = bucket;
 
-            const filepath = getPath(user.id, bucket.name, name);
+            const filepath = getPath(user.id, bucket.name, name + ext);
 
             fs.renameSync(blob.path, filepath);
-            blob.name = name;
+            blob.name = name + ext;
             blob.path = filepath;
             await Blob.save(blob);
             return res.status(200).send('Blob successfully renamed');

@@ -70,7 +70,6 @@ class BucketController {
             updateFolder(getPath(user.id, bucket.name), getPath(user.id, name));
             return res.status(200).send(`Bucket successfully updated`);
         } catch (error) {
-            console.log('error', error);
             return res.status(404).send('Bucket not found');
         }
     }

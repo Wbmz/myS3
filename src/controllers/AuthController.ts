@@ -31,7 +31,6 @@ class AuthController {
                     data: user,
                 });
             } catch (error) {
-                console.log(error);
                 return res.status(409).send('Email already used');
             }
         }
