@@ -5,14 +5,15 @@ import { Bucket } from './../entities/Bucket.entity';
 
 class BucketController {
     static async save(req: Request, res: Response): Promise<Response> {
-        const fields: string[] = ['name', 'userId'];
+        const fields: string[] = ['name'];
         const missingValues = fields.filter(key => !(key in req.body));
         if (missingValues.length === 0) {
-            const { name, userId } = req.body;
+            const { user_id } = req.params;
+            const { name } = req.body;
             let user: User;
             let bucket: Bucket = new Bucket();
             try {
-                user = await User.findOneOrFail(userId);
+                user = await User.findOneOrFail(user_id);
             } catch (error) {
                 return res.status(404).send('User not found');
             }

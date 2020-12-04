@@ -1,5 +1,6 @@
 import { Request, Response } from 'express';
 import fs from 'fs';
+import { escapeRegExp } from 'lodash';
 import path from 'path';
 import { Blob } from '../entities/Blob.entity';
 import { deleteFile, getPath } from '../helpers';
@@ -7,9 +8,33 @@ import { Bucket } from './../entities/Bucket.entity';
 
 class BlobController {
     static async getByBucket(req: Request, res: Response): Promise<Response> {
-        const { id } = req.params;
-        const blobs = await Blob.find({ where: { bucket: { id } } });
+        const { bucket_id } = req.params;
+        const blobs = await Blob.find({ where: { bucket: { id: bucket_id } } });
         return res.status(200).send({ data: blobs });
+    }
+
+    static async edit(req: Request, res: Response): Promise<Response> {
+        const { id } = req.params;
+        const { name } = req.body;
+
+        try {
+            const blob = await Blob.findOneOrFail({
+                where: { id },
+                relations: ['bucket', 'bucket.user'],
+            });
+            const { bucket } = blob;
+            const { user } = bucket;
+
+            const filepath = getPath(user.id, bucket.name, name);
+
+            fs.renameSync(blob.path, filepath);
+            blob.name = name;
+            blob.path = filepath;
+            await Blob.save(blob);
+            return res.status(200).send('Blob successfully renamed');
+        } catch (error) {
+            return res.status(404).send('Blob not found');
+        }
     }
 
     static async download(req: Request, res: Response): Promise<void> {
@@ -48,6 +73,7 @@ class BlobController {
         try {
             blob = await Blob.findOneOrFail({
                 where: { id },
+                relations: ['bucket'],
             });
         } catch (error) {
             return res.status(404).send('Blob not found');
@@ -55,13 +81,14 @@ class BlobController {
 
         if (fs.existsSync(blob.path)) {
             const { dir, name, ext } = path.parse(blob.path);
-            const regex: RegExp = new RegExp(name + `.copy.([\\d]+)`);
+            const regex: RegExp = new RegExp(escapeRegExp(name + `.copy.`) + '([\\d]+)');
             const duplicateFiles: string[] = fs.readdirSync(dir).filter(file => file.match(regex));
             const lastDuplicate: string | undefined = duplicateFiles.sort().pop();
             let newFile = `${name}.copy.1${ext}`;
 
             if (lastDuplicate) {
                 const fileCopy: RegExpMatchArray | null = lastDuplicate.match(regex);
+
                 if (fileCopy) {
                     newFile = `${name}.copy.${Number(fileCopy[1]) + 1}${ext}`;
                     fs.copyFileSync(blob.path, path.join(dir, newFile));
@@ -69,22 +96,35 @@ class BlobController {
             } else {
                 fs.copyFileSync(blob.path, path.join(dir, newFile));
             }
-            return res.status(200).send(`${name} duplicated into ${newFile}`);
+
+            try {
+                const blobCopy: Blob = new Blob();
+
+                blobCopy.name = newFile;
+                blobCopy.mimetype = blob.mimetype;
+                blobCopy.size = blob.size;
+                blobCopy.bucket = blob.bucket;
+                blobCopy.path = path.join(dir, newFile);
+
+                await Blob.save(blobCopy);
+
+                return res.status(200).send(`${name} duplicated into ${newFile}`);
+            } catch (error) {
+                return res.status(500).send();
+            }
         }
 
         return res.status(404).send(`${blob.name} path not found`);
     }
 
     static async save(req: Request, res: Response): Promise<Response> {
-        const fields: string[] = ['bucketId', 'userId'];
-        const missingValues = fields.filter(key => !(key in req.body));
-        if (req.file && missingValues.length === 0) {
+        if (req.file) {
             const { originalname, mimetype, buffer, size } = req.file;
-            const { bucketId, userId } = req.body;
+            const { bucket_id } = req.params;
             let bucket: Bucket;
             try {
                 bucket = await Bucket.findOneOrFail({
-                    where: { id: bucketId, user: { id: userId } },
+                    where: { id: bucket_id },
                     relations: ['user'],
                 });
             } catch (error) {
@@ -97,22 +137,22 @@ class BlobController {
             } catch (error) {}
 
             try {
-                const blob: Blob = new Blob();
+                let blob: Blob = new Blob();
                 const filepath = getPath(user.id, bucket.name, originalname);
                 blob.name = originalname;
                 blob.mimetype = mimetype;
                 blob.size = size;
                 blob.bucket = bucket;
                 blob.path = filepath;
-                await Blob.save(blob);
+                blob = await Blob.save(blob);
                 fs.writeFileSync(filepath, buffer);
-                return res.status(200).send('Successfully added the blob');
+                return res.status(200).send({ data: blob });
             } catch (error) {
                 return res.status(500).send();
             }
         }
 
-        return res.status(400).send(`${missingValues.join(', ')} are missing`);
+        return res.status(400).send('File is missing');
     }
 
     static async delete(req: Request, res: Response): Promise<Response> {

@@ -50,6 +50,10 @@ const validateEmail = (email: string): boolean => {
     return re.test(email.toLowerCase());
 };
 
+const escapeRegex = (str: string): string => {
+    return str.replace(/[-[\]{}()*+?.,\\^$|]/g, '\\$&');
+};
+
 export {
     formatString,
     dateUtils,
@@ -59,4 +63,5 @@ export {
     deleteFile,
     getPath,
     validateEmail,
+    escapeRegex,
 };

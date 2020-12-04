@@ -7,8 +7,9 @@ const upload = multer();
 
 routes.post('/', upload.single('blob'), BlobController.save);
 routes.get('/:id', BlobController.download);
-routes.post('/duplicate/:id', BlobController.duplicate);
-routes.get('/metadata/:id', BlobController.metadata);
+routes.put('/:id', BlobController.edit);
 routes.delete('/:id', BlobController.delete);
+routes.post('/:id/duplicate', BlobController.duplicate);
+routes.get('/:id/metadata', BlobController.metadata);
 
 export default routes;
