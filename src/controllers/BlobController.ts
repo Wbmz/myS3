@@ -13,7 +13,7 @@ class BlobController {
         return res.status(200).send({ data: blobs });
     }
 
-    static async edit(req: Request, res: Response): Promise<Response> {
+    static async update(req: Request, res: Response): Promise<Response> {
         const { id } = req.params;
         const { name } = req.body;
 
@@ -107,7 +107,6 @@ class BlobController {
                 blobCopy.path = path.join(dir, newFile);
 
                 await Blob.save(blobCopy);
-
                 return res.status(200).send(`${name} duplicated into ${newFile}`);
             } catch (error) {
                 return res.status(500).send();

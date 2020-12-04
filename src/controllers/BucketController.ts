@@ -34,7 +34,7 @@ class BucketController {
                 return res.status(500).send(`Couldn't create bucket`);
             }
         }
-        return res.status(400).send(`${missingValues.join(', ')} are missing`);
+        return res.status(400).send(`${missingValues.join(', ')} is missing`);
     }
 
     static async exist(req: Request, res: Response): Promise<Response> {
@@ -70,6 +70,7 @@ class BucketController {
             updateFolder(getPath(user.id, bucket.name), getPath(user.id, name));
             return res.status(200).send(`Bucket successfully updated`);
         } catch (error) {
+            console.log('error', error);
             return res.status(404).send('Bucket not found');
         }
     }
