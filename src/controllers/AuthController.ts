@@ -1,6 +1,6 @@
 import { Request, Response } from 'express';
 import jwt from 'jsonwebtoken';
-import { config, createFolder, getPath } from '../helpers';
+import { config, createFolder, getPath, validateEmail } from '../helpers';
 import { User } from './../entities/User.entity';
 import { sendConfirmationEmail, sendPasswordChanged, sendPasswordReset } from './../emails/index';
 
@@ -16,6 +16,7 @@ class AuthController {
         const missingValues = fields.filter(key => !(key in req.body));
         if (missingValues.length === 0) {
             const { nickname, email, password }: User = req.body;
+            if (!validateEmail(email)) return res.status(400).send('Invalid email provided');
             let user: User = new User();
             user.nickname = nickname;
             user.email = email;
@@ -30,6 +31,7 @@ class AuthController {
                     data: user,
                 });
             } catch (error) {
+                console.log(error);
                 return res.status(409).send('Email already used');
             }
         }

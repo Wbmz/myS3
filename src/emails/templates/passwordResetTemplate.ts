@@ -1,7 +1,6 @@
 import mjml2html from 'mjml';
 
 function passwordResetTemplate({ nickname, token }: { nickname: string; token: string }): string {
-    console.log(token);
     const htmlOutput = mjml2html(
         `
       <mjml>

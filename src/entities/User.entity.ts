@@ -11,7 +11,7 @@ import {
     OneToMany,
     BeforeUpdate,
 } from 'typeorm';
-import { Length, IsDate } from 'class-validator';
+import { Length, IsDate, IsEmail } from 'class-validator';
 import { hashSync, compareSync, genSaltSync } from 'bcryptjs';
 
 @Entity()
@@ -24,6 +24,7 @@ export class User extends BaseEntity {
     nickname!: string;
 
     @Column()
+    @IsEmail()
     email!: string;
 
     @Column({ select: false })

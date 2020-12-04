@@ -1,7 +1,7 @@
 import moment from 'moment';
 import fs from 'fs';
 import path from 'path';
-import { MYS3_FOLDER } from '../data/constants';
+import { MYS3_PATH } from '../data/constants';
 moment.locale('fr');
 
 const formatString = (string: string): string => {
@@ -18,7 +18,7 @@ const dateUtils = {
 };
 
 const getPath = (...name: string[]): string => {
-    return path.join(MYS3_FOLDER, ...name);
+    return path.join(MYS3_PATH, ...name);
 };
 
 const createFolder = (name: string): void => {
@@ -45,4 +45,18 @@ const deleteFile = (name: string): void => {
     }
 };
 
-export { formatString, dateUtils, createFolder, updateFolder, deleteFolder, deleteFile, getPath };
+const validateEmail = (email: string): boolean => {
+    const re = /^[a-zA-Z0-9.a-zA-Z0-9.!#$%&'*+-/=?^_`{|}~]+@[a-zA-Z0-9]+\.[a-zA-Z]+/;
+    return re.test(email.toLowerCase());
+};
+
+export {
+    formatString,
+    dateUtils,
+    createFolder,
+    updateFolder,
+    deleteFolder,
+    deleteFile,
+    getPath,
+    validateEmail,
+};

@@ -24,7 +24,6 @@ class UserController {
             await User.update(id, data);
             return res.status(200).send(`User successfully updated`);
         } catch (error) {
-            console.log(error);
             return res.status(404).send('User not found');
         }
     }
